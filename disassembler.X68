@@ -1,11 +1,13 @@
 *-----------------------------------------------------------
-* Title      : Dissassembler
+* Title      : Disassembler
 * Written by : Joe Pennington, Michael Plotke, Jacky Wong
 * Date       :
 * Description:
 *-----------------------------------------------------------
 
 START:	ORG		$1000		; first instruction
+
+* magic disassembly code goes here
 
 		MOVE.B	#9,D0		; set task 9:
 		TRAP	#15			; terminate program
