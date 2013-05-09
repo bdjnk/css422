@@ -30,9 +30,18 @@
 ;    RTS
 ;-----------------------------------------------------------
 
-START:	ORG		$1000		; first instruction
+START:	ORG			$1000		; first instruction
+
+		MOVEA.W		#$7004,A0	; staging address
 
 ; tests for MOVE.B
+; ...when source is #<data>, sets the data for later MOVEs
+		MOVE.B		#$12,D0
+		MOVE.B		#$24,(A0)
+		MOVE.B		#$36,(A0)+
+		MOVE.B		#$48,-(A0)
+		MOVE.B		#$5A,$7010
+		MOVE.B		#$6C,$00007014
 ; ...when source is Dn
 		MOVE.B		Dn,Dn
 		MOVE.B		Dn,(An)
@@ -75,15 +84,15 @@ START:	ORG		$1000		; first instruction
 		MOVE.B		$,-(An)
 		MOVE.B		$,$
 		MOVE.B		$,$
-; ...when source is #<data>
-		MOVE.B		#$,Dn
-		MOVE.B		#$,(An)
-		MOVE.B		#$,(An)+
-		MOVE.B		#$,-(An)
-		MOVE.B		#$,$
-		MOVE.B		#$,$
 
 ; tests for MOVE.W
+; ...when source is #<data>, sets the data for later MOVEs
+		MOVE.W		#$,Dn
+		MOVE.W		#$,(An)
+		MOVE.W		#$,(An)+
+		MOVE.W		#$,-(An)
+		MOVE.W		#$,$
+		MOVE.W		#$,$
 ; ...when source is Dn
 		MOVE.W		Dn,Dn
 		MOVE.W		Dn,(An)
@@ -126,15 +135,15 @@ START:	ORG		$1000		; first instruction
 		MOVE.W		$,-(An)
 		MOVE.W		$,$
 		MOVE.W		$,$
-; ...when source is #<data>
-		MOVE.W		#$,Dn
-		MOVE.W		#$,(An)
-		MOVE.W		#$,(An)+
-		MOVE.W		#$,-(An)
-		MOVE.W		#$,$
-		MOVE.W		#$,$
 
 ; tests for MOVE.L
+; ...when source is #<data>, sets the data for later MOVEs
+		MOVE.L		#$,Dn
+		MOVE.L		#$,(An)
+		MOVE.L		#$,(An)+
+		MOVE.L		#$,-(An)
+		MOVE.L		#$,$
+		MOVE.L		#$,$
 ; ...when source is Dn
 		MOVE.L		Dn,Dn
 		MOVE.L		Dn,(An)
@@ -177,13 +186,6 @@ START:	ORG		$1000		; first instruction
 		MOVE.L		$,-(An)
 		MOVE.L		$,$
 		MOVE.L		$,$
-; ...when source is #<data>
-		MOVE.L		#$,Dn
-		MOVE.L		#$,(An)
-		MOVE.L		#$,(An)+
-		MOVE.L		#$,-(An)
-		MOVE.L		#$,$
-		MOVE.L		#$,$
 
 		MOVE.B	#9,D0		; set task 9:
 		TRAP	#15			; terminate program
