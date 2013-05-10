@@ -6,14 +6,13 @@
 *-----------------------------------------------------------
 
 START:	ORG			$1000		; first instruction
-
-		MOVEA.W		#$7018,A0	; staging address 1
-		MOVEA.W		#$7010,A1	; staging address 2
+	
 		
 		MOVE.B		#$18,$00007000
 		MOVE.W		#$0770,$00007002
 		MOVE.L		#$0B640000,$00007004
 		
+		BSR			RESET
 		MOVE.L		#$0B640000,(A0)
 		MOVE.L		#$0B640000,(A1)+
 		MOVE.L		#$0B640000,-(A0)
@@ -22,6 +21,10 @@ START:	ORG			$1000		; first instruction
 		TRAP		#15			; terminate program
 		
 		SIMHALT					; halt simulator
+		
+RESET	MOVEA.W		#$7018,A0	; staging address 1
+		MOVEA.W		#$7010,A1	; staging address 2
+		RTS
 		
 		END			START		; last line of source
 *~Font name~Courier New~
