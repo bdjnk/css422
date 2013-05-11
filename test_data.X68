@@ -10,8 +10,8 @@
 ; Dn		Data Register Direct
 ; An		Address Register Direct
 ; (An)		Address Register Indirect
-; (An)+		Address Register Indirect with Post incrementing
-; -(An)		Address Register Indirect with Pre decrementing
+; -(An)		Address Register Indirect with Post incrementing
+; (An)+		Address Register Indirect with Pre decrementing
 ; (xxx).W	Absolute Word Address
 ; (xxx).L	Absolute Long Address
 ; #<data>	Immediate Data
@@ -38,101 +38,101 @@ START:	ORG			$1000		; first instruction
 ; ...when source is #<data>, sets the data for later MOVEs
 		MOVE.B		#$12,D0
 		MOVE.B		#$24,(A0)
-		MOVE.B		#$36,(A0)+
-		MOVE.B		#$48,-(A0)
+		MOVE.B		#$36,-(A0)
+		MOVE.B		#$48,(A0)+
 		MOVE.B		#$5A,$7010
 		MOVE.B		#$6C,$00007014
 ; ...when source is Dn
-		MOVE.B		Dn,Dn
-		MOVE.B		Dn,(An)
-		MOVE.B		Dn,(An)+
-		MOVE.B		Dn,-(An)
-		MOVE.B		Dn,$
-		MOVE.B		Dn,$
+		MOVE.B		D0,D1
+		MOVE.B		D0,(A0)
+		MOVE.B		D0,-(A0)
+		MOVE.B		D0,(A0)+
+		MOVE.B		D0,$7010
+		MOVE.B		D0,$00007014
 ; ...when source is (An)
-		MOVE.B		(An),Dn
+		MOVE.B		(An),D0
 		MOVE.B		(An),(An)
-		MOVE.B		(An),(An)+
 		MOVE.B		(An),-(An)
-		MOVE.B		(An),$
-		MOVE.B		(An),$
-; ...when source is (An)+
-		MOVE.B		(An)+,Dn
-		MOVE.B		(An)+,(An)
-		MOVE.B		(An)+,(An)+
-		MOVE.B		(An)+,(An)
-		MOVE.B		(An)+,$
-		MOVE.B		(An)+,$
+		MOVE.B		(An),(An)+
+		MOVE.B		(An),$7010
+		MOVE.B		(An),$00007014
 ; ...when source is -(An)
-		MOVE.B		-(An),Dn
+		MOVE.B		-(An),D0
 		MOVE.B		-(An),(An)
-		MOVE.B		-(An),(An)+
 		MOVE.B		-(An),-(An)
-		MOVE.B		-(An),$
-		MOVE.B		-(An),$
+		MOVE.B		-(An),(An)
+		MOVE.B		-(An),$7010
+		MOVE.B		-(An),$00007014
+; ...when source is (An)+
+		MOVE.B		(An)+,D0
+		MOVE.B		(An)+,(An)
+		MOVE.B		(An)+,-(An)
+		MOVE.B		(An)+,(An)+
+		MOVE.B		(An)+,$7010
+		MOVE.B		(An)+,$00007014
 ; ...when source is (xxx).W
-		MOVE.B		$,Dn
+		MOVE.B		$,D0
 		MOVE.B		$,(An)
-		MOVE.B		$,(An)+
 		MOVE.B		$,-(An)
-		MOVE.B		$,$
-		MOVE.B		$,$
+		MOVE.B		$,(An)+
+		MOVE.B		$,$7010
+		MOVE.B		$,$00007014
 ; ...when source is (xxx).L
-		MOVE.B		$,Dn
+		MOVE.B		$,D0
 		MOVE.B		$,(An)
-		MOVE.B		$,(An)+
 		MOVE.B		$,-(An)
-		MOVE.B		$,$
-		MOVE.B		$,$
+		MOVE.B		$,(An)+
+		MOVE.B		$,$7010
+		MOVE.B		$,$00007014
 
 ; tests for MOVE.W
 ; ...when source is #<data>, sets the data for later MOVEs
 		MOVE.W		#$,Dn
 		MOVE.W		#$,(An)
-		MOVE.W		#$,(An)+
 		MOVE.W		#$,-(An)
+		MOVE.W		#$,(An)+
 		MOVE.W		#$,$
 		MOVE.W		#$,$
 ; ...when source is Dn
 		MOVE.W		Dn,Dn
 		MOVE.W		Dn,(An)
-		MOVE.W		Dn,(An)+
 		MOVE.W		Dn,-(An)
+		MOVE.W		Dn,(An)+
 		MOVE.W		Dn,$
 		MOVE.W		Dn,$
 ; ...when source is (An)
 		MOVE.W		(An),Dn
 		MOVE.W		(An),(An)
-		MOVE.W		(An),(An)+
 		MOVE.W		(An),-(An)
+		MOVE.W		(An),(An)+
 		MOVE.W		(An),$
 		MOVE.W		(An),$
-; ...when source is (An)+
-		MOVE.W		(An)+,Dn
-		MOVE.W		(An)+,(An)
-		MOVE.W		(An)+,(An)+
-		MOVE.W		(An)+,-(An)
-		MOVE.W		(An)+,
-		MOVE.W		(An)+,
 ; ...when source is -(An)
 		MOVE.W		-(An),Dn
 		MOVE.W		-(An),(An)
-		MOVE.W		-(An),(An)+
 		MOVE.W		-(An),-(An)
-		MOVE.W		-(An),$
-		MOVE.W		-(An),$
+		MOVE.W		-(An),(An)+
+		MOVE.W		-(An),
+		MOVE.W		-(An),
+; ...when source is (An)+
+		MOVE.W		(An)+,Dn
+		MOVE.W		(An)+,(An)
+		MOVE.W		(An)+,-(An)
+		MOVE.W		(An)+,(An)+
+		MOVE.W		(An)+,$
+		MOVE.W		(An)+,$
 ; ...when source is (xxx).W
 		MOVE.W		$,Dn
 		MOVE.W		$,(An)
-		MOVE.W		$,(An)+
 		MOVE.W		$,-(An)
+		MOVE.W		$,(An)+
 		MOVE.W		$,$
 		MOVE.W		$,$
 ; ...when source is (xxx).L
 		MOVE.W		$,Dn
 		MOVE.W		$,(An)
-		MOVE.W		$,(An)+
 		MOVE.W		$,-(An)
+		MOVE.W		$,(An)+
 		MOVE.W		$,$
 		MOVE.W		$,$
 
@@ -140,50 +140,50 @@ START:	ORG			$1000		; first instruction
 ; ...when source is #<data>, sets the data for later MOVEs
 		MOVE.L		#$,Dn
 		MOVE.L		#$,(An)
-		MOVE.L		#$,(An)+
 		MOVE.L		#$,-(An)
+		MOVE.L		#$,(An)+
 		MOVE.L		#$,$
 		MOVE.L		#$,$
 ; ...when source is Dn
 		MOVE.L		Dn,Dn
 		MOVE.L		Dn,(An)
-		MOVE.L		Dn,(An)+
 		MOVE.L		Dn,-(An)
+		MOVE.L		Dn,(An)+
 		MOVE.L		Dn,$
 		MOVE.L		Dn,$
 ; ...when source is (An)
 		MOVE.L		(An),Dn
 		MOVE.L		(An),(An)
-		MOVE.L		(An),(An)+
 		MOVE.L		(An),-(An)
+		MOVE.L		(An),(An)+
 		MOVE.L		(An),$
 		MOVE.L		(An),$
-; ...when source is (An)+
-		MOVE.L		(An)+,Dn
-		MOVE.L		(An)+,(An)
-		MOVE.L		(An)+,(An)+
-		MOVE.L		(An)+,-(An)
-		MOVE.L		(An)+,$
-		MOVE.L		(An)+,$
 ; ...when source is -(An)
 		MOVE.L		-(An),Dn
 		MOVE.L		-(An),(An)
-		MOVE.L		-(An),(An)+
 		MOVE.L		-(An),-(An)
+		MOVE.L		-(An),(An)+
 		MOVE.L		-(An),$
 		MOVE.L		-(An),$
+; ...when source is (An)+
+		MOVE.L		(An)+,Dn
+		MOVE.L		(An)+,(An)
+		MOVE.L		(An)+,-(An)
+		MOVE.L		(An)+,(An)+
+		MOVE.L		(An)+,$
+		MOVE.L		(An)+,$
 ; ...when source is (xxx).W
 		MOVE.L		$,Dn
 		MOVE.L		$,(An)
-		MOVE.L		$,(An)+
 		MOVE.L		$,-(An)
+		MOVE.L		$,(An)+
 		MOVE.L		$,$
 		MOVE.L		$,$
 ; ...when source is (xxx).L
 		MOVE.L		$,Dn
 		MOVE.L		$,(An)
-		MOVE.L		$,(An)+
 		MOVE.L		$,-(An)
+		MOVE.L		$,(An)+
 		MOVE.L		$,$
 		MOVE.L		$,$
 
