@@ -11,11 +11,23 @@ mask EQU $00FF * Isolates the byte value
 stack EQU $B000 * Location of stack pointer
 
 * Program starts here
-		ORG $0400 			* Program runs here
+		ORG $1000 			* Program runs here
 start 	LEA stack,SP 		* Set-up the stack pointer 
+		LEA MESSAGE,A1
+		MOVE #14,D0
+		TRAP #15
 		MOVE.W #2,D0		* TRAP #2
 		TRAP #15			* Get Value
-		CLR.W D7 			* We'll need this register
+		jsr convert
+		MOVE.W	D7,D2
+		LEA MESSAGEA,A1
+		MOVE #14,D0
+		TRAP #15
+		MOVE.W	#2,D0
+		TRAP #15
+		jsr convert
+		
+convert	CLR.W D7 			* We'll need this register
 		MOVE.B (A1)+,D0 	* Get the first byte 
 		ANDI.W #mask,D0 	* Isolate the byte
 		jsr strip_ascii 	* Get rid of the ascii code
@@ -37,7 +49,7 @@ start 	LEA stack,SP 		* Set-up the stack pointer
 		jsr strip_ascii 	* Get rid of the ASCII code
 		OR.W D0,D7 			* Add the last hex digit
 		MOVE.W D7,(A1)+ 	* Save the converted value
-		STOP #$2700 		* Return to the simulator
+		RTS
 		
 strip_ascii CMP.B #$39,D0 	* Is it in range of 0-9?
 			BLE sub30		* It's a number
@@ -49,10 +61,15 @@ sub37 		SUB.B #$37,D0 	* Strip 37
 			BRA ret_sa 		* Go back
 sub30 		SUB.B #$30,D0 	* Strip 30
 ret_sa 		RTS 			* Go back
-* Data 
 
+* Data 
 con_val 	DS.W 1 				* Save it here
+
+MESSAGE		DC.B	'Please enter 4-hex starting address:',0
+MESSAGEA	DC.B	'Please enter 4-hex ending address:',0
 			END $400
+
+
 
 *~Font name~Courier New~
 *~Font size~10~
