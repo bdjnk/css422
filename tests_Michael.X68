@@ -7,7 +7,6 @@
 
 START:	ORG			$1000		; first instruction
 	
-		
 		MOVE.B		#$18,$00007000
 		MOVE.W		#$0770,$00007002
 		MOVE.L		#$0B640000,$00007004

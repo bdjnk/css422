@@ -1,3 +1,7 @@
 *.L68
 *.S68
+<<<<<<< HEAD
 .DS_Store
+=======
+*.pdf
+>>>>>>> 2f48ab617a3b651409eab12f0edeec57f2803aad
