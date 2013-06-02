@@ -7,8 +7,30 @@
     ORG    $1000
 START:                  ; first instruction of program
 			
-			MOVE.B	#14,D0
+			MOVE.B	#14,D0			*Set trap code
+			MOVE.B	#16,D2			*value for Trap #15 - base to convert number to
+			MOVE.W	#$0204,D7		*temp value for Instruction and Length
+			MOVE.W	#$0101,D6		*temp value for both EA's
+			MOVE.W	#$1111,D5		*temp value for first operand
+			MOVE.W	#$2222,D4		*temp value for second operand
+			
+			JSR		INSTRUCT		*jump to instruct
+			MOVE.L	D5,D1			*Move first operand into place
+			LEA		MSG_SPACE,A1	*Move MSG_SPACE into place
+			MOVE.B	#14,D0			*Set Trap
+			TRAP	#15				*Print space
+			JSR		EA				*Jump to EA
+			MOVE.L	D4,D1			*Move second operand into place
+			LEA		MSG_COMMA,A1	*Move MSG_COMMA into place
+			MOVE.B	#14,D0			*Set Trap
+			TRAP	#15				*Print comma
+			JSR		EA				*jump to EA
+			LEA		MSG_NEWL,A1		*Move New Line into place
+			MOVE.B	#14,D0			*Set Trap
+			TRAP	#15				*Print new line
+			BRA		ENDPRINT		*End printing
 
+*Print instruction
 INSTRUCT    CMP.B   #$1,D7
             BEQ     PRINT_MOVE
             CMP.B   #$2,D7
@@ -67,139 +89,178 @@ INSTRUCT    CMP.B   #$1,D7
             BEQ     PRINT_BHI
             CMP.B   #$29,D7
             BEQ     PRINT_RTS
-            
-            LSL		#8,D7
 
-LENGTH		CMP.B   #$1,D7
+*Print length            
+LENGTH      
+			LSR		#8,D7			*Shift Bits
+
+			CMP.B   #$1,D7
 			BEQ     PRINT_BYTE
 			CMP.B   #$2,D7
 			BEQ     PRINT_WORD
 			CMP.B   #$3,D7
 			BEQ     PRINT_LONG
 			
-			LSL		#4,D7
-			
-EA			CMP.B   #$1,D7
+*Print EA
+EA			
+			CMP.B   #$1,D6
 			BEQ     PRINT_DN
-			CMP.B   #$2,D7
+			CMP.B   #$2,D6
 			BEQ     PRINT_AN
-			CMP.B   #$3,D7
+			CMP.B   #$3,D6
 			BEQ     PRINT_ARI
-			CMP.B   #$4,D7
+			CMP.B   #$4,D6
 			BEQ     PRINT_ARIPOST
-			CMP.B   #$5,D7
+			CMP.B   #$5,D6
 			BEQ     PRINT_ARIPRE
-			CMP.B   #$6,D7
+			CMP.B   #$6,D6
 			BEQ     PRINT_ABSWORD
-			CMP.B   #$7,D7
+			CMP.B   #$7,D6
 			BEQ		PRINT_ABSLONG
-			CMP.B   #$8,D7
+			CMP.B   #$8,D6
 			BEQ		PRINT_ID
 			
-			LSL		#4,D7
+			LSR		#8,D6			*Shift Bits
+			
 
 PRINT_MOVE
 			LEA		MSG_MOVE,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_MOVEQ
 			LEA		MSG_MOVEQ,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_MOVEA
 			LEA		MSG_MOVEA,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_ADD
 			LEA		MSG_ADD,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_ADDA
 			LEA		MSG_ADDA,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_ADDI
 			LEA		MSG_ADDI,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_ADDQ
 			LEA		MSG_ADDQ,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_SUB
 			LEA		MSG_SUB,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_SUBA
 			LEA		MSG_SUBA,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_SUBI
 			LEA		MSG_SUBI,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_SUBQ
 			LEA		MSG_SUBQ,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_LEA
 			LEA		MSG_LEA,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_AND
 			LEA		MSG_AND,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_ANDI
 			LEA		MSG_ANDI,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_EOR
 			LEA		MSG_EOR,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_EORI
 			LEA		MSG_EORI,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_ASL
 			LEA		MSG_ASL,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_ASR
 			LEA		MSG_ASR,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_LSL
 			LEA		MSG_LSL,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_LSR
 			LEA		MSG_LSR,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_CMP
 			LEA		MSG_CMP,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_CMPA
 			LEA		MSG_CMPA,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_CMPI
 			LEA		MSG_CMPI,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_BEQ
 			LEA		MSG_BEQ,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_BLS
 			LEA		MSG_BLS,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_BLT
 			LEA		MSG_BLT,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_BNE
 			LEA		MSG_BNE,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_BHI
 			LEA		MSG_BHI,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_RTS
 			LEA		MSG_RTS,A1
 			TRAP 	#15
+			BRA		LENGTH
 PRINT_BYTE
 			LEA		MSG_BYTE,A1
 			TRAP 	#15
+			RTS
 PRINT_WORD
 			LEA		MSG_WORD,A1
 			TRAP 	#15
+			RTS
 PRINT_LONG
 			LEA		MSG_LONG,A1
 			TRAP 	#15
+			RTS
 PRINT_DN
 			LEA		MSG_DN,A1
 			TRAP 	#15
+			MOVE.B	#15,D0
+			TRAP	#15
+			RTS
 PRINT_AN
 			LEA		MSG_AN,A1
 			TRAP 	#15
+			RTS
 PRINT_ARI
 			LEA		MSG_ABS1,A1
 			TRAP 	#15
@@ -208,6 +269,7 @@ PRINT_ARI
 			LEA 	MSG_ABS2,A1
 			MOVE.B	#14,D0
 			TRAP	#15
+			RTS
 PRINT_ARIPOST
 			LEA		MSG_ARIPOST,A1
 			TRAP 	#15
@@ -218,6 +280,7 @@ PRINT_ARIPOST
 			LEA 	MSG_ABS2,A1
 			MOVE.B	#14,D0
 			TRAP	#15
+			RTS
 PRINT_ARIPRE
 			LEA		MSG_ABS1,A1
 			TRAP	#15
@@ -228,6 +291,7 @@ PRINT_ARIPRE
 			TRAP	#15
 			LEA		MSG_ARIPRE,A1
 			TRAP 	#15
+			RTS
 PRINT_ABSWORD
 			LEA		MSG_ABS1,A1
 			TRAP	#15
@@ -238,6 +302,7 @@ PRINT_ABSWORD
 			TRAP	#15
 			LEA		MSG_WORD,A1
 			TRAP 	#15
+			RTS
 PRINT_ABSLONG
 			LEA		MSG_ABS1,A1
 			TRAP	#15
@@ -248,22 +313,17 @@ PRINT_ABSLONG
 			TRAP	#15
 			LEA		MSG_LONG,A1
 			TRAP 	#15
+			RTS
 PRINT_ID
 			LEA		MSG_ID1,A1
 			TRAP	#15
 			MOVE.B	#3,D0
 			TRAP	#15
-			LEA 	MSG_ID2,A1
-			MOVE.B	#14,D0
-			TRAP	#15
+			RTS
 			
 
-
-            
-
-
-CR          EQU     $0D     *Carriage Return
-LF          EQU     $0A     *Line Feed
+CR          EQU     $0D     		*Carriage Return
+LF          EQU     $0A     		*Line Feed
 
 MSG_MOVE    DC.B    'MOVE',0
 MSG_MOVEQ   DC.B    'MOVEQ',0
@@ -300,21 +360,26 @@ MSG_LONG    DC.B    '.L',0
 MSG_DN      DC.B    'D',0
 MSG_AN      DC.B    'A',0
 MSG_ABS1    DC.B    '(',0
-MSG_ABS2    DC.B    ')'0
+MSG_ABS2    DC.B    ')',0
 MSG_ARIPOST DC.B    '-',0
 MSG_ARIPRE  DC.B    '+',0
-MSG_ID1     DC.B    '#<',0
-MSG_ID2     DC.B    '>',0
+MSG_ID1     DC.B    '#',0
+MSG_COMMA	DC.B	',',0
+MSG_SPACE	DC.B	' ',0
+MSG_NEWL	DC.B	'',CR,LF,0
     
 
 
 
-
+ENDPRINT
 
 
 
 
     END    START        ; last line of source
+
+
+
 
 *~Font name~Courier New~
 *~Font size~10~
