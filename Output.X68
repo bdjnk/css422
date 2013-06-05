@@ -9,7 +9,7 @@ START:                  ; first instruction of program
 			
 			MOVE.B	#14,D0			*Set trap code
 			MOVE.B	#16,D2			*value for Trap #15 - base to convert number to
-			MOVE.L	#$03040204,D7		*temp value for Instruction and Length
+			MOVE.L	#$01010204,D7		*temp value for Instruction and Length
 			MOVE.W	#$0101,D6		*temp value for both EA's
 			MOVE.W	#$1111,D5		*temp value for first operand
 			
@@ -88,6 +88,7 @@ INSTRUCT    CMP.B   #$1,D7
             BEQ     PRINT_BHI
             CMP.B   #$29,D7
             BEQ     PRINT_RTS
+            BRA     ERROR_INSTRUCT
 
 *Print length            
 LENGTH      
@@ -99,6 +100,7 @@ LENGTH
 			BEQ     PRINT_WORD
 			CMP.B   #$3,D7
 			BEQ     PRINT_LONG
+			BRA     ERROR_LENGTH
 			
 *Print EA
 EA			
@@ -119,6 +121,8 @@ EA
 			BEQ		PRINT_ABSLONG
 			CMP.B   #$8,D7
 			BEQ		PRINT_ID
+			BRA     ERROR_EA
+			
 			
 			
 
@@ -251,12 +255,16 @@ PRINT_LONG
 			TRAP 	#15
 			RTS
 PRINT_DN
+            CMP     #7,D1
+            BHI     ERROR_DN
 			LEA		MSG_DN,A1
 			TRAP 	#15
 			MOVE.B	#15,D0
 			TRAP	#15
 			RTS
 PRINT_AN
+            CMP     #7,D1
+            BHI     ERROR_AN
 			LEA		MSG_AN,A1
 			TRAP 	#15
 			RTS
@@ -320,6 +328,33 @@ PRINT_ID
 			TRAP	#15
 			RTS
 			
+ERROR_INSTRUCT
+            LEA     MSG_ER_IN,A1
+            MOVE.B  #14,D0
+            TRAP    #15
+            BRA     LENGTH
+ERROR_LENGTH
+            LEA     MSG_ER_LE,A1
+            MOVE.B  #14,D0
+            TRAP    #15
+            RTS
+ERROR_EA
+            LEA     MSG_ER_EA,A1
+            MOVE.B  #14,D0
+            TRAP    #15
+            RTS
+            
+ERROR_DN    
+            LEA     MSG_ER_DN,A1
+            MOVE.B  #14,D0
+            TRAP    #15
+            RTS
+ERROR_AN
+            LEA     MSG_ER_AN,A1
+            MOVE.B  #14,D0
+            TRAP    #15
+            RTS
+			
 
 CR          EQU     $0D     		*Carriage Return
 LF          EQU     $0A     		*Line Feed
@@ -365,6 +400,11 @@ MSG_ARIPRE  DC.B    '+',0
 MSG_ID1     DC.B    '#',0
 MSG_COMMA	DC.B	',',0
 MSG_SPACE	DC.B	' ',0
+MSG_ER_IN   DC.B    'INVALID INSTRUCTION',0
+MSG_ER_LE   DC.B    'INVALID INSTRUCTION',0
+MSG_ER_EA   DC.B    'INVALID EA',0
+MSG_ER_DN   DC.B    'INVALID DATA REGISTER',0
+MSG_ER_AN   DC.B    'INVALID ADDRESS REGISTER',0
 MSG_NEWL	DC.B	'',CR,LF,0
     
 
