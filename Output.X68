@@ -12,15 +12,14 @@ START:                  ; first instruction of program
 			MOVE.L	#$03040204,D7		*temp value for Instruction and Length
 			MOVE.W	#$0101,D6		*temp value for both EA's
 			MOVE.W	#$1111,D5		*temp value for first operand
-			MOVE.W	#$2222,D4		*temp value for second operand
 			
 			JSR		INSTRUCT		*jump to instruct
-			MOVE.L	D5,D1			*Move first operand into place
+			MOVE.L	D6,D1			*Move first operand into place
 			LEA		MSG_SPACE,A1	*Move MSG_SPACE into place
 			MOVE.B	#14,D0			*Set Trap
 			TRAP	#15				*Print space
 			JSR		EA				*Jump to EA
-			MOVE.L	D4,D1			*Move second operand into place
+			MOVE.L	D5,D1			*Move second operand into place
 			LEA		MSG_COMMA,A1	*Move MSG_COMMA into place
 			MOVE.B	#14,D0			*Set Trap
 			TRAP	#15				*Print comma
