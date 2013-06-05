@@ -9,7 +9,7 @@ START:                  ; first instruction of program
 			
 			MOVE.B	#14,D0			*Set trap code
 			MOVE.B	#16,D2			*value for Trap #15 - base to convert number to
-			MOVE.W	#$0204,D7		*temp value for Instruction and Length
+			MOVE.L	#$03040204,D7		*temp value for Instruction and Length
 			MOVE.W	#$0101,D6		*temp value for both EA's
 			MOVE.W	#$1111,D5		*temp value for first operand
 			MOVE.W	#$2222,D4		*temp value for second operand
@@ -92,7 +92,7 @@ INSTRUCT    CMP.B   #$1,D7
 
 *Print length            
 LENGTH      
-			LSR		#8,D7			*Shift Bits
+			LSR.L		#8,D7			*Shift Bits
 
 			CMP.B   #$1,D7
 			BEQ     PRINT_BYTE
@@ -103,24 +103,24 @@ LENGTH
 			
 *Print EA
 EA			
-			CMP.B   #$1,D6
+            LSR.L   #8,D7
+			CMP.B   #$1,D7
 			BEQ     PRINT_DN
-			CMP.B   #$2,D6
+			CMP.B   #$2,D7
 			BEQ     PRINT_AN
-			CMP.B   #$3,D6
+			CMP.B   #$3,D7
 			BEQ     PRINT_ARI
-			CMP.B   #$4,D6
+			CMP.B   #$4,D7
 			BEQ     PRINT_ARIPOST
-			CMP.B   #$5,D6
+			CMP.B   #$5,D7
 			BEQ     PRINT_ARIPRE
-			CMP.B   #$6,D6
+			CMP.B   #$6,D7
 			BEQ     PRINT_ABSWORD
-			CMP.B   #$7,D6
+			CMP.B   #$7,D7
 			BEQ		PRINT_ABSLONG
-			CMP.B   #$8,D6
+			CMP.B   #$8,D7
 			BEQ		PRINT_ID
 			
-			LSR		#8,D6			*Shift Bits
 			
 
 PRINT_MOVE
@@ -377,6 +377,7 @@ ENDPRINT
 
 
     END    START        ; last line of source
+
 
 
 
