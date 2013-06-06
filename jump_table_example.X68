@@ -5,7 +5,7 @@
 
 * System equates
 stack		EQU		$A000
-example		EQU		%1101111001100001	* I made up bits 0 to 11
+example		EQU		%0000111001100001	* I made up bits 0 to 11
 shift		EQU		12					* Shift 12 bits
 
 * Program starts here
@@ -69,6 +69,7 @@ code1110	STOP	#$2700
 code1111	STOP	#$2700
 
 			END		$400 
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
