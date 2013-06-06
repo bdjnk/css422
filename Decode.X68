@@ -45,8 +45,11 @@ C0000
 			MOVE.W	#TEST,D0			; move our command into D0
 			
 			BTST	#8,D0
-			BEQ		
-			
+			BEQ		0N0
+			MOVE.L	#1,D1
+			STOP	#$2700
+0N0
+			MOVE.L	#0,D1
 			STOP	#$2700
 			
 C0001		STOP	#$2700				; MOVE (or MOVEA) of size BYTE
