@@ -45,10 +45,10 @@ C0000
 			MOVE.W	#TEST,D0			; move our command into D0
 			
 			BTST	#8,D0
-			BEQ		0N0
+			BEQ		BIT8IS0
 			MOVE.L	#1,D1
 			STOP	#$2700
-0N0
+BIT8IS0
 			MOVE.L	#0,D1
 			STOP	#$2700
 			

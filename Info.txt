@@ -1,3 +1,28 @@
+HERE IS WHAT WE NEED TO TEST
+
+  Effective Addressing Modes:
+1 Dn		Data Register Direct
+2 An		Address Register Direct
+3 (An)		Address Register Indirect
+4 -(An)		Address Register Indirect with Post incrementing
+5 (An)+		Address Register Indirect with Pre decrementing
+6 (xxx).W	Absolute Word Address
+7 (xxx).L	Absolute Long Address
+8 #<data>	Immediate Data
+
+      Instructions:
+1-3   MOVE, MOVEQ, MOVEA
+4-7   ADD, ADDA, ADDI, ADDQ
+8-11  SUB, SUBA, SUBI, SUBQ
+12    LEA
+13-14 AND, ANDI
+15-16 EOR, EORI
+17-18 ASL, ASR
+19-20 LSL, LSR
+21-23 CMP, CMPA, CMPI
+24-28 Bcc (BEQ, BLS, BLT, BNE, BHI)
+29    RTS
+
 D7:
 00000000 <-- invalid command, do nothing
 01010101 <-- MOVE.B Dn,Dn
