@@ -18,7 +18,7 @@ CR      EQU     $0D             ASCII code for Carriage Return
 LF      EQU     $0A             ASCII code for Line Feed
 MESSAGE	DC.B	'            __    ______  __   __                                              ',CR,LF
 		DC.B	'           / /   |\  __ \|\ \ |  |                                             ',CR,LF
-		DC.B	'          |\ \___ \\ \_\ \\\ \/  /                                             ',CR,LF
+		DC.B	'          |\ \____\\ \_\ \\\ \/  /                                             ',CR,LF
 		DC.B	'           \\  __ \\\  __ \\\  _ \_                                            ',CR,LF
 		DC.B	'            \\ \_\ \\\ \_\ \\\ \\_ \_                                          ',CR,LF
 		DC.B	'  __  __     \\_____\\\_____\\\_\\\__\               __     __                 ',CR,LF

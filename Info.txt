@@ -4,8 +4,8 @@ HERE IS WHAT WE NEED TO TEST
 1 Dn		Data Register Direct
 2 An		Address Register Direct
 3 (An)		Address Register Indirect
-4 -(An)		Address Register Indirect with Post incrementing
-5 (An)+		Address Register Indirect with Pre decrementing
+4 (An)+		Address Register Indirect with Pre decrementing
+5 -(An)		Address Register Indirect with Post incrementing
 6 (xxx).W	Absolute Word Address
 7 (xxx).L	Absolute Long Address
 8 #<data>	Immediate Data
