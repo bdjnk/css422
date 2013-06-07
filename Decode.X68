@@ -9,8 +9,8 @@
 *-----------------------------------------------------------
 
 * System equates
-;test	EQU		%0100111001110101	; example command
-test	EQU		%0001111001110101	; example command
+test	EQU		%0100100111111001	; example command
+;test	EQU		%0001111001110101	; example command
 
 * Program starts here
 		ORG     $400
@@ -117,10 +117,21 @@ byte1code4
 		ADDI.B	#$0C,D7
 		
 		* todo : add LEA's EA stuff
+		MOVE.L	#4,D2				; shift left 4 bits
+		LSL.W	D2,D1				; to clear what we don't want
+		MOVE.L	#13,D2
+		LSR.L	D2,D1
 		
-		JMP		alldone
+		MOVE.L	D1,D6
+		ADDI.L	#$2000000,D7
+		
+		JSR		getEA
+		MOVE.L	#16,D2
+		JSR		setEA
+		
+		JMP		alldone				; done ---------------------------> LEA
 isRTS
-		ADDI.B	#1D,D7				; all zeros except 29 
+		ADDI.B	#$1D,D7				; all zeros except 29 
 		JMP		alldone				; done ---------------------------> RTS
 		
 byte1code5
@@ -156,22 +167,52 @@ byte1code14
 byte1code15
 		JMP		alldone
 
-setEA
+* Puts the EA info into D1. Call setEA right after!
+getEA
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		MOVE.L	#10,D2				; shift left 10 bits
-		LSL.L	D2,D1				; to clear what we don't want
+		LSL.W	D2,D1				; to clear what we don't want
 		MOVE.L	#13,D2				; shift right 13 bits
 		LSR.L	D2,D1				; so only the EA mode (M) remains
 		
+		JMP		checkEA
+		
+checkEA
 		CMPI.B	#4,D1				; greater than 4 requires consideration
 		BGT		figureEA			; while 4 or less we can map directly
 		
 		ADDI.B	#1,D1				; 0 is meaningless, start from 1
-		LSL.B	#8,D1				; don't overwrite our command byte
-		ADDI.B	D1,D7				; add the EA to our info register
+		RTS
 		
-		CMPI.L	#$FF00,D1			; figure out which position
-		BGT		isTarget			; else isSource
+figureEA
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		MOVE.L	#10,D2				; shift left 10 bits
+		LSL.W	D2,D1				; to clear what we don't want
+		MOVE.L	#10,D2				; shift right 13 bits
+		LSR.L	D2,D1				; so the EA mode & "register" remains
+		
+		CMPI.B	#$38,D1
+		BEQ		isAbsWord
+		CMPI.B	#$39,D1
+		BEQ		isAbsLong			; else is Immediate Data
+		
+		MOVE.L	#8,D1
+		RTS
+		
+isAbsWord
+		MOVE.L	#6,D1
+		RTS
+isAbsLong
+		MOVE.L	#7,D1
+		RTS
+		
+* Make sure to set D2 correctly (to 16 or 24) before calling setEA!
+setEA
+		LSL.L	D2,D1				; don't overwrite our command byte
+		ADD.L	D1,D7				; add the EA to our info register
+		
+		CMPI.L	#$FF0000,D1			; figure out which position
+		;BGT		isTarget			; else isSource
 		
 		RTS
 		
@@ -181,6 +222,7 @@ alldone
 		END		$400
 
 		
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
