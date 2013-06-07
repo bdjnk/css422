@@ -7,6 +7,9 @@
 
 START:	ORG			$1000		; first instruction
 	
+		MOVE.L		#19,D1
+		ADD.L		#$F300,D1
+		
 		MOVE.B		#$18,$00007000
 		MOVE.W		#$0770,$00007002
 		MOVE.L		#$0B640000,$00007004
@@ -26,6 +29,7 @@ RESET	MOVEA.W		#$7018,A0	; staging address 1
 		RTS
 		
 		END			START		; last line of source
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~

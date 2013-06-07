@@ -23,6 +23,8 @@ HERE IS WHAT WE NEED TO TEST
 24-28 Bcc (BEQ, BLS, BLT, BNE, BHI)
 29    RTS
 
+In hex, instructions range from 0x01-0x1D
+
 D7:
 00000000 <-- invalid command, do nothing
 01010101 <-- MOVE.B Dn,Dn

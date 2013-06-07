@@ -64,24 +64,24 @@ in0bit8is0
 		CMPI.B	#5,D1				
 		BEQ		isEORI				; else it's a CMPI
 		
-		ADDI.B	#23,D7				; 
+		ADDI.B	#$17,D7				; 
 		
 		JMP		alldone
 		
 isANDI
-		ADDI.B	#14,D7
+		ADDI.B	#$0E,D7
 		
 		JMP		alldone
 isSUBI
-		ADDI.B	#10,D7
+		ADDI.B	#$0A,D7
 		
 		JMP		alldone
 isADDI
-		ADDI.B	#6,D7
+		ADDI.B	#$06,D7
 		
 		JMP		alldone
 isEORI
-		ADDI.B	#16,D7
+		ADDI.B	#$10,D7
 		
 		JMP		alldone
 		
@@ -114,13 +114,13 @@ byte1code4
 		CMPI.W	#%0100111001110101,D1
 		BEQ		isRTS				; otherwise it's LEA
 		
-		ADDI.B	#12,D7
+		ADDI.B	#$0C,D7
 		
 		* todo : add LEA's EA stuff
 		
 		JMP		alldone
 isRTS
-		ADDI.B	#29,D7				; all zeros except 29 
+		ADDI.B	#1D,D7				; all zeros except 29 
 		JMP		alldone				; done ---------------------------> RTS
 		
 byte1code5
@@ -132,13 +132,13 @@ byte1code6
 byte1code7
 		JMP		alldone
 
-byte1code8								; no valid commands start with 1000
+byte1code8							; no valid commands start with 1000
 		JMP		alldone
 
 byte1code9
 		JMP		alldone
 
-byte1code10								; no commands start with 1010 (?)
+byte1code10							; no commands start with 1010 (?)
 		JMP		alldone
 
 byte1code11
@@ -162,7 +162,16 @@ setEA
 		LSL.L	D2,D1				; to clear what we don't want
 		MOVE.L	#13,D2				; shift right 13 bits
 		LSR.L	D2,D1				; so only the EA mode (M) remains
-		CMPI.B	#0,D1
+		
+		CMPI.B	#4,D1				; greater than 4 requires consideration
+		BGT		figureEA			; while 4 or less we can map directly
+		
+		ADDI.B	#1,D1				; 0 is meaningless, start from 1
+		LSL.B	#8,D1				; don't overwrite our command byte
+		ADDI.B	D1,D7				; add the EA to our info register
+		
+		CMPI.L	#$FF00,D1			; figure out which position
+		BGT		isTarget			; else isSource
 		
 		RTS
 		
@@ -171,8 +180,7 @@ alldone
 
 		END		$400
 
-
-
+		
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
