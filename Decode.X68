@@ -9,13 +9,14 @@
 *-----------------------------------------------------------
 
 * System equates
-test	EQU		%0100100111111001	; example command
-;test	EQU		%0001111001110101	; example command
+;test	EQU		%0100100111111001	; example LEA command
+;test	EQU		%0000011000000111	; example ADDI command
+test	EQU		%0010111001000111	; example MOVEA command
 
 * Program starts here
-		ORG     $400
+start	ORG     $400
 				 
-start:	CLR.L	D7					; clear D7 (just in case)
+		CLR.L	D7					; clear D7 (just in case)
 		CLR.L	D0					; clear D0 (in preperation)
 		MOVE.W	#test,D0			; move our command into D0
 			
@@ -27,7 +28,7 @@ start:	CLR.L	D7					; clear D7 (just in case)
 		LEA		byte1,A0			; give A0 our jump table's address
 		JSR		00(A0,D1)			; jump indirect with index
 
-byte1	JMP		byte1code0
+byte1	JMP		byte1code0			; based on the first four bytes
 		JMP		byte1code1
 		JMP		byte1code2
 		JMP		byte1code3
@@ -51,61 +52,78 @@ byte1code0
 									; none of these are valid commands
 		JMP		alldone
 in0bit8is0
-		LSL.W	#4,D1				; shift by word, chops 4 highest bits
-		MOVE.L	#12,D2				; shift left 12 bits
-		LSR.L	D2,D1				; so D1 holds only the second 4 bits
+		JSR		getEA
+		MOVE.L	#24,D2				; 24 means this is the second argument
+		JSR		setEA
 		
-		CMPI.B	#1,D1				; 
+		JSR		setSize
+		
+		ADDI.L	#$80000,D7
+		
+		MOVE.L	#8,D2				; so D1 holds only the second 4 bits
+		LSR.L	D2,D1				; shift left 8 bits
+		
+		CMPI.B	#1,D1
 		BEQ		isANDI
 		CMPI.B	#2,D1
 		BEQ		isSUBI
 		CMPI.B	#3,D1
 		BEQ		isADDI
 		CMPI.B	#5,D1				
-		BEQ		isEORI				; else it's a CMPI
+		BEQ		isEORI
+		CMPI.B	#6,D1
+		BEQ		isCMPI
 		
-		ADDI.B	#$17,D7				; 
-		
-		JMP		alldone
+		JMP		alldone				; anything else is not a valid command
 		
 isANDI
 		ADDI.B	#$0E,D7
-		
-		JMP		alldone
+		JMP		alldone				; done --------------------------> ANDI
 isSUBI
 		ADDI.B	#$0A,D7
-		
-		JMP		alldone
+		JMP		alldone				; done --------------------------> SUBI
 isADDI
 		ADDI.B	#$06,D7
-		
-		JMP		alldone
+		JMP		alldone				; done --------------------------> ADDI
 isEORI
 		ADDI.B	#$10,D7
-		
-		JMP		alldone
+		JMP		alldone				; done --------------------------> EORI
+isCMPI
+		ADDI.B	#$17,D7
+		JMP		alldone				; done --------------------------> CMPI
 		
 byte1code1							; MOVE (or MOVEA) of size BYTE
-		
-		
+		ADDI.L	#$100,D7
+		JMP		isMOVE
 byte1code2							; MOVE (or MOVEA) of size LONG
-		
-		JMP		alldone
-		
+		ADDI.L	#$300,D7
+		JMP		isMOVE
 byte1code3							; MOVE (or MOVEA) of size WORD
-		
-		JMP		alldone
-		
+		ADDI.L	#$200,D7
+		JMP		isMOVE
 isMOVE
-		MOVE.L	D0,D1				; reset D1 to D0 (full command)
-		LSL.W	#7,D1				; shift by word, chops 7 highest bits
-		MOVE.L	#15,D2				; shift left 15 bits
-		LSR.L	D2,D1				; so D1 holds only the third 3 bits
+		JSR		getEA
+		MOVE.L	#16,D2				; 16 means this is the second argument
+		JSR		setEA
+		
+		MOVE.L	#7,D2				; chop off the 7 first bits
+		LSL.W	D2,D1				; shift command word left 7 bits
+		MOVE.L	#13,D2				; so D1 holds only the third 3 bits
+		LSR.L	D2,D1				; shift right 13 bits
+		
 		CMPI.B	#1,D1				; if D1 == 1 it's a MOVEA
 		BEQ		isMOVEA				; otherwise it's just a MOVE
 		
 		JMP		alldone
 isMOVEA
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		
+		MOVE.L	#4,D2				; chop off the 4 first bits
+		LSL.W	D2,D1				; shift command word left 7 bits
+		MOVE.L	#13,D2				; so D1 holds only the second 3 bits
+		LSR.L	D2,D1				; shift right 13 bits
+		
+		MOVE.L	D1,D5
 		
 		JMP		alldone
 		
@@ -114,16 +132,15 @@ byte1code4
 		CMPI.W	#%0100111001110101,D1
 		BEQ		isRTS				; otherwise it's LEA
 		
-		ADDI.B	#$0C,D7
+		ADDI.B	#$0C,D7				; LEA is 0x0C (12)
 		
-		* todo : add LEA's EA stuff
-		MOVE.L	#4,D2				; shift left 4 bits
-		LSL.W	D2,D1				; to clear what we don't want
-		MOVE.L	#13,D2
-		LSR.L	D2,D1
+		MOVE.L	#4,D2				; to clear what we don't want
+		LSL.W	D2,D1				; shift command word left 4 bits
+		MOVE.L	#13,D2				; and then
+		LSR.L	D2,D1				; shift entire long right 13 bits
 		
-		MOVE.L	D1,D6
-		ADDI.L	#$2000000,D7
+		MOVE.L	D1,D6				; put the An # in D6
+		ADDI.L	#$2000000,D7		; second EA is type An (2)
 		
 		JSR		getEA
 		MOVE.L	#16,D2
@@ -166,16 +183,44 @@ byte1code14
 
 byte1code15
 		JMP		alldone
+		
+setSize
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		MOVE.L	#8,D2				; to clear what we don't want
+		LSL.W	D2,D1				; shift left 10 bits
+		MOVE.L	#13,D2				; so only the size remains
+		LSR.L	D2,D1				; shift right 14 bits
+		
+		CMPI.B	#0,D1
+		BEQ		isByte
+		CMPI.B	#1,D1
+		BEQ		isWord
+		CMPI.B	#2,D1
+		BEQ		isLong
+		
+		JMP		sizeSet				; else invalid size!
+isByte
+		ADDI.L	#$100,D7
+		JMP		sizeSet
+isWord
+		ADDI.L	#$200,D7
+		JMP		sizeSet
+isLong
+		ADDI.L	#$300,D7
+		JMP		sizeSet	
+sizeSet
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		RTS
 
 * Puts the EA info into D1. Call setEA right after!
 getEA
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
-		MOVE.L	#10,D2				; shift left 10 bits
-		LSL.W	D2,D1				; to clear what we don't want
-		MOVE.L	#13,D2				; shift right 13 bits
-		LSR.L	D2,D1				; so only the EA mode (M) remains
+		MOVE.L	#10,D2				; to clear what we don't want
+		LSL.W	D2,D1				; shift left 10 bits
+		MOVE.L	#13,D2				; so only the EA mode (M) remains
+		LSR.L	D2,D1				; shift right 13 bits
 		
-		JMP		checkEA
+		JMP		checkEA				; check if figuring is needed
 		
 checkEA
 		CMPI.B	#4,D1				; greater than 4 requires consideration
@@ -186,19 +231,18 @@ checkEA
 		
 figureEA
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
-		MOVE.L	#10,D2				; shift left 10 bits
-		LSL.W	D2,D1				; to clear what we don't want
-		MOVE.L	#10,D2				; shift right 13 bits
-		LSR.L	D2,D1				; so the EA mode & "register" remains
+		MOVE.L	#10,D2				; to clear what we don't want
+		LSL.W	D2,D1				; shift left 10 bits
+		MOVE.L	#10,D2				; so the EA mode & "register" remains
+		LSR.L	D2,D1				; shift right 10 bits
 		
 		CMPI.B	#$38,D1
 		BEQ		isAbsWord
 		CMPI.B	#$39,D1
-		BEQ		isAbsLong			; else is Immediate Data
+		BEQ		isAbsLong			; else (42) is Immediate Data
 		
 		MOVE.L	#8,D1
 		RTS
-		
 isAbsWord
 		MOVE.L	#6,D1
 		RTS
@@ -211,15 +255,34 @@ setEA
 		LSL.L	D2,D1				; don't overwrite our command byte
 		ADD.L	D1,D7				; add the EA to our info register
 		
-		CMPI.L	#$FF0000,D1			; figure out which position
-		;BGT		isTarget			; else isSource
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		MOVE.L	#13,D2				; to clear what we don't want
+		LSL.W	D2,D1				; shift left 13 bits
+		MOVE.L	#13,D2				; so only the "register" # remains
+		LSR.L	D2,D1				; shift right 13 bits
 		
+		CMPI.L	#16,D2				; is it EA 1
+		BEQ		isSource
+		CMPI.L	#24,D2				;    or EA 2
+		BEQ		isTarget
+isSource
+		MOVE.L	D1,D6				; set register #
+		JMP		EAset
+isTarget
+		MOVE.L	D1,D5				; set register #
+		JMP		EAset
+EAset
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		RTS
 		
 alldone
 		STOP	#$2700
+		
+CR		EQU		$0D			; ASCII code for Carriage Return
+LF		EQU		$0A			; ASCII code for Line Feed
+error	DC.B	'error at ',SP,CR,LF,0
 
-		END		$400
+		END		start
 
 		
 

@@ -26,7 +26,7 @@
             <Keywords name="Folders in comment, close"></Keywords>
             <Keywords name="Keywords1">abcd add adda addi addq addx and andi asl asr bcc bcs beq bge bgt bhi bhs ble blo bls blt bmi bne bpl bvc bvs bchg bclr bra bset bsr btst chk clr cmp cmpa cmpi cmpm dbcc dbf dbra dbeq divs divu eor eori exg ext illegal jmp jsr lea link lsl lsr move movea movem movep moveq muls mulu nbcd neg negx nop not or ori pea reset rol ror roxl roxr rte rtr rts sbcd scc scs seq sge sgt shi sle sls slt smi sne spl svc svs sf st stop sub suba subi subq subx swap tas trap trapv tst unlk</Keywords>
             <Keywords name="Keywords2">dc ds blk equ even org</Keywords>
-            <Keywords name="Keywords3">d0 d1 d2 d3 d4 d5 d7 a0 a1 a2 a3 a4 a5 a6 a7 sp</Keywords>
+            <Keywords name="Keywords3">d0 d1 d2 d3 d4 d5 d6 d7 a0 a1 a2 a3 a4 a5 a6 a7 sp</Keywords>
             <Keywords name="Keywords4"></Keywords>
             <Keywords name="Keywords5"></Keywords>
             <Keywords name="Keywords6"></Keywords>
