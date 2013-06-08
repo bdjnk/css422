@@ -114,6 +114,8 @@ isMOVE
 		CMPI.B	#1,D1				; if D1 == 1 it's a MOVEA
 		BEQ		isMOVEA				; otherwise it's just a MOVE
 		
+		; todo Finish MOVE...
+		
 		JMP		alldone
 isMOVEA
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
@@ -123,9 +125,10 @@ isMOVEA
 		MOVE.L	#13,D2				; so D1 holds only the second 3 bits
 		LSR.L	D2,D1				; shift right 13 bits
 		
-		MOVE.L	D1,D5
+		MOVE.L	D1,D5				; stick An # in D5
+		ADDI.L	#$2000000,D7		; add An to D7 as destination
 		
-		JMP		alldone
+		JMP		alldone				; done -------------------------> MOVEA
 		
 byte1code4
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
@@ -255,10 +258,14 @@ setEA
 		LSL.L	D2,D1				; don't overwrite our command byte
 		ADD.L	D1,D7				; add the EA to our info register
 		
+		CMPI.B	#5,D1				; if it uses a register
+		BLE		setRegisterNumber	; ...
+		JMP		EAset				; otherwise we're done here
+setRegisterNumber
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		MOVE.L	#13,D2				; to clear what we don't want
 		LSL.W	D2,D1				; shift left 13 bits
-		MOVE.L	#13,D2				; so only the "register" # remains
+		MOVE.L	#13,D2				; so only the register # remains
 		LSR.L	D2,D1				; shift right 13 bits
 		
 		CMPI.L	#16,D2				; is it EA 1
@@ -280,7 +287,7 @@ alldone
 		
 CR		EQU		$0D			; ASCII code for Carriage Return
 LF		EQU		$0A			; ASCII code for Line Feed
-error	DC.B	'error at ',SP,CR,LF,0
+error	DC.B	'error',CR,LF,0
 
 		END		start
 
