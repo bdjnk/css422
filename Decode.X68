@@ -11,7 +11,7 @@
 * System equates
 ;test	EQU		%0100100111111001	; example LEA command
 ;test	EQU		%0000011000000111	; example ADDI command
-test	EQU		%0010111001000111	; example MOVEA command
+test	EQU		%0010011000000100	; example MOVE command
 
 * Program starts here
 start	ORG     $400
@@ -53,12 +53,13 @@ byte1code0
 		JMP		alldone
 in0bit8is0
 		JSR		getEA
-		MOVE.L	#24,D2				; 24 means this is the second argument
+		MOVE.L	#24,D2				; 24 = isTarget (second argument)
+		MOVE.L	#13,D3				; register number is last 3 bits
 		JSR		setEA
 		
-		JSR		setSize
+		JSR		setSize				; work for normal size (bits 9 & 10)
 		
-		ADDI.L	#$80000,D7
+		ADDI.L	#$80000,D7			; source is immediate data
 		
 		MOVE.L	#8,D2				; so D1 holds only the second 4 bits
 		LSR.L	D2,D1				; shift left 8 bits
@@ -75,7 +76,6 @@ in0bit8is0
 		BEQ		isCMPI
 		
 		JMP		alldone				; anything else is not a valid command
-		
 isANDI
 		ADDI.B	#$0E,D7
 		JMP		alldone				; done --------------------------> ANDI
@@ -93,17 +93,21 @@ isCMPI
 		JMP		alldone				; done --------------------------> CMPI
 		
 byte1code1							; MOVE (or MOVEA) of size BYTE
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		ADDI.L	#$100,D7
 		JMP		isMOVE
 byte1code2							; MOVE (or MOVEA) of size LONG
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		ADDI.L	#$300,D7
 		JMP		isMOVE
 byte1code3							; MOVE (or MOVEA) of size WORD
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		ADDI.L	#$200,D7
 		JMP		isMOVE
 isMOVE
 		JSR		getEA
-		MOVE.L	#16,D2				; 16 means this is the second argument
+		MOVE.L	#16,D2				; 16 = isSource (first argument)
+		MOVE.L	#13,D3				; register number is last 3 bits
 		JSR		setEA
 		
 		MOVE.L	#7,D2				; chop off the 7 first bits
@@ -114,9 +118,13 @@ isMOVE
 		CMPI.B	#1,D1				; if D1 == 1 it's a MOVEA
 		BEQ		isMOVEA				; otherwise it's just a MOVE
 		
-		; todo Finish MOVE...
+		ADDI.B	#1,D1				; 0 is meaningless, start from 1
+		MOVE.L	#24,D2				; 24 = isTarget
+		MOVE.L	#4,D3				; register number is middle 3 bits
+		JSR		setEA
 		
-		JMP		alldone
+		ADDI.L	#$01,D7
+		JMP		alldone				; done --------------------------> MOVE
 isMOVEA
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		
@@ -128,6 +136,7 @@ isMOVEA
 		MOVE.L	D1,D5				; stick An # in D5
 		ADDI.L	#$2000000,D7		; add An to D7 as destination
 		
+		ADDI.L	#$03,D7
 		JMP		alldone				; done -------------------------> MOVEA
 		
 byte1code4
@@ -146,7 +155,8 @@ byte1code4
 		ADDI.L	#$2000000,D7		; second EA is type An (2)
 		
 		JSR		getEA
-		MOVE.L	#16,D2
+		MOVE.L	#16,D2				; 16 = isSource
+		MOVE.L	#13,D3				; register number is last 3 bits
 		JSR		setEA
 		
 		JMP		alldone				; done ---------------------------> LEA
@@ -155,38 +165,121 @@ isRTS
 		JMP		alldone				; done ---------------------------> RTS
 		
 byte1code5
-		JMP		alldone
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		
+		JSR		setSize
+		
+		JSR		getEA
+		MOVE.L	#24,D2				; 24 = isTarget
+		MOVE.L	#13,D3				; register number is last 3 bits
+		JSR		setEA
+		
+		ADDI.L	#$80000,D7			; source is immediate data
+		
+		BTST	#8,D1				; test bit number 8 of D0
+		BEQ		isADDQ				; if it's 0 jump to isADDQ
+		
+		ADDI.L	#$B,D7
+		JMP		alldone				; done --------------------------> SUBQ
+isADDQ
+		ADDI.L	#$7,D7
+		JMP		alldone				; done --------------------------> ADDQ
 
 byte1code6
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		
+		; TODO Bcc <-------------------------------------------------------
+		
 		JMP		alldone
 
-byte1code7
-		JMP		alldone
+byte1code7							; this is MOVEQ
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		MOVE.L	#$1080302,D7		; byte (long) from immediate to Dn
+		
+		MOVE.L	#1,D1				; indicates a Dn
+		MOVE.L	#24,D2				; 24 = isTarget
+		MOVE.L	#4,D3				; register number is middle 3 bits
+		JSR		setEA
+		
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		MOVE.L	#8,D2				; get rid of everything but the data
+		LSL.L	D2,D1
+		MOVE.L	D1,D6				; the data goes in D6 (EA 1)
+		
+		JMP		alldone				; done -------------------------> MOVEQ
 
 byte1code8							; no valid commands start with 1000
 		JMP		alldone
 
 byte1code9
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		
+		MOVE.L	#8,D2
+		LSL.L	D2,D1
+		MOVE.L	#14,D2
+		LSR.L	D2,D1
+		
+		CMPI.B	#3,D1
+		BEQ		isSUBA				; else isSUB
+		
+		JSR		setSize
+		ADDI.L	#$8,D7
+		
+		BTST	#8,D1				; test bit number 8 of D0
+		BEQ		EAofSUBisTarget		; if it's 0, EA is target
+		
+		JSR		getEA
+		MOVE.L	#16,D2				; 16 = isSource
+		MOVE.L	#13,D3				; register number is last 3 bits
+		JSR		setEA
+		
+		MOVE.L	#24,D2				; 24 = isTarget
+		MOVE.L	#4,D3				; register number is middle 3 bits
+		JSR		setEA
+		
 		JMP		alldone
+EAofSUBisTarget
+		JSR		getEA
+		MOVE.L	#24,D2				; 24 = isTarget
+		MOVE.L	#13,D3				; register number is last 3 bits
+		JSR		setEA
+		
+		MOVE.L	#16,D2				; 16 = isSource
+		MOVE.L	#4,D3				; register number is middle 3 bits
+		JSR		setEA
+		
+		JMP		alldone				; done ---------------------------> SUB
+isSUBA
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		
+		; TODO SUBA <------------------------------------------------------
+		
+		ADDI.L	#$9,D7
+		JMP		alldone				; done --------------------------> SUBA
 
 byte1code10							; no commands start with 1010 (?)
 		JMP		alldone
 
 byte1code11
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		JMP		alldone
 
 byte1code12
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		JMP		alldone
 
 byte1code13
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		JMP		alldone
 
 byte1code14
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		JMP		alldone
 
-byte1code15
+byte1code15							; no commands start with 1010 (?)
 		JMP		alldone
 		
+* Figures out the size (if in bits 9 and 10) and sets D7 appropriately
 setSize
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		MOVE.L	#8,D2				; to clear what we don't want
@@ -254,6 +347,7 @@ isAbsLong
 		RTS
 		
 * Make sure to set D2 correctly (to 16 or 24) before calling setEA!
+* Also make sure to set D3 (to 4 or 13)
 setEA
 		LSL.L	D2,D1				; don't overwrite our command byte
 		ADD.L	D1,D7				; add the EA to our info register
@@ -263,14 +357,13 @@ setEA
 		JMP		EAset				; otherwise we're done here
 setRegisterNumber
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
-		MOVE.L	#13,D2				; to clear what we don't want
-		LSL.W	D2,D1				; shift left 13 bits
-		MOVE.L	#13,D2				; so only the register # remains
-		LSR.L	D2,D1				; shift right 13 bits
+		LSL.W	D3,D1				; shift back and forth to leave only
+		MOVE.L	#13,D3
+		LSR.L	D3,D1				; the correct 3 bit register number
 		
-		CMPI.L	#16,D2				; is it EA 1
+		CMPI.L	#16,D2				; is it EA 1 (source)
 		BEQ		isSource
-		CMPI.L	#24,D2				;    or EA 2
+		CMPI.L	#24,D2				;    or EA 2 (target)
 		BEQ		isTarget
 isSource
 		MOVE.L	D1,D6				; set register #
