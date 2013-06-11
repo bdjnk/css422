@@ -366,6 +366,14 @@ isADDA
 byte1code14 * ======================================================== 1110
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		
+		MOVE.L	#13,D2				* leave the last 3 bits (register #)
+		LSL.L	D2,D1
+		MOVE.L	#13,D2
+		LSR.L	D2,D1
+		
+		ADDI.L	#$1000000,D7		; shifts apply to data registers
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		
 		MOVE.L	#8,D2				* leave the 2 "size" bits
 		LSL.L	D2,D1
 		MOVE.L	#14,D2
@@ -384,9 +392,9 @@ byte1code14 * ======================================================== 1110
 		BTST	#11,D0				; if bit 11 of D0 is 0, uses immediate
 		BEQ		isImmediate			; else uses a register
 		
-		ADDI.L	#$10000,D7
+		ADDI.L	#$10000,D7			; shift is held in a data register
 		
-continueXSd1
+continueXSd
 		MOVE.L	D1,D6
 		
 		MOVE.L	#11,D2				* leave the 2 bits before the 3 last
@@ -397,15 +405,34 @@ continueXSd1
 		CMPI.B	#0,D1				; if 0, shift is arithmatic
 		BEQ		isASd				; else shift is logical
 		
-		JMP		alldone
+		BTST	#8,D0				; if bit 8 of D0 is 1, shift left
+		BNE		isLSL				; else shift right
+		
+		ADDI.L	#14,D7
+		
+		JMP		alldone				; done ---------------------------> LSR
 		
 isImmediate
 		ADDI.L	#$80000,D7
-		JMP		continueXSd1
+		JMP		continueXSd
 		
 isASd
 		BTST	#8,D0				; if bit 8 of D0 is 1, shift left
-		BNE		isLeftShift			; else shift right
+		BNE		isASL				; else shift right
+		
+		ADDI.L	#12,D7
+		JMP		alldone				; done ---------------------------> ASR
+		
+isASL
+		ADDI.L	#11,D7
+		JMP		alldone				; done ---------------------------> ASL
+
+isLSL
+		ADDI.L	#13,D7
+		JMP		alldone				; done ---------------------------> LSL
+		
+isWAT								* Michael: this is not clear to me...
+		JMP		alldone
 		
 isLeftShift
 
