@@ -365,7 +365,49 @@ isADDA
 
 byte1code14 * ======================================================== 1110
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		
+		MOVE.L	#8,D2				* leave the 2 "size" bits
+		LSL.L	D2,D1
+		MOVE.L	#14,D2
+		LSR.L	D2,D1
+		
+		CMPI.B	#3,D1				; if "size" is 3
+		BEQ		isWAT				; else command is ASd or LSd
+		
+		JSR		setSize
+		
+		MOVE.L	#4,D2				* leave the 3 "rotation" bits
+		LSL.L	D2,D1
+		MOVE.L	#13,D2
+		LSR.L	D2,D1
+		
+		BTST	#11,D0				; if bit 11 of D0 is 0, uses immediate
+		BEQ		isImmediate			; else uses a register
+		
+		ADDI.L	#$10000,D7
+		
+continueXSd1
+		MOVE.L	D1,D6
+		
+		MOVE.L	#11,D2				* leave the 2 bits before the 3 last
+		LSL.L	D2,D1
+		MOVE.L	#14,D2
+		LSR.L	D2,D1
+		
+		CMPI.B	#0,D1				; if 0, shift is arithmatic
+		BEQ		isASd				; else shift is logical
+		
 		JMP		alldone
+		
+isImmediate
+		ADDI.L	#$80000,D7
+		JMP		continueXSd1
+		
+isASd
+		BTST	#8,D0				; if bit 8 of D0 is 1, shift left
+		BNE		isLeftShift			; else shift right
+		
+isLeftShift
 
 byte1code15 * no commands start with ================================= 1111
 		JMP		alldone
