@@ -573,10 +573,10 @@ figureEA
 		MOVE.L	#10,D2				; so the EA mode & "register" remains
 		LSR.L	D2,D1				; shift right 10 bits
 		
-		CMPI.B	#$56,D1
+		CMPI.B	#$38,D1
 		BEQ		isAbsWord
-		CMPI.B	#$57,D1
-		BEQ		isAbsLong			; else (60) is Immediate Data
+		CMPI.B	#$39,D1
+		BEQ		isAbsLong			; else (42) is Immediate Data
 		
 		MOVE.L	#8,D1
 		RTS
