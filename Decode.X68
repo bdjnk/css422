@@ -52,6 +52,7 @@ byte1code0 * ========================================================= 0000
 		BEQ		in0bit8is0			; if it's 0 jump to in0bit8is0
 									; none of these are valid commands
 		JMP		alldone
+		
 in0bit8is0
 		JSR		getEA
 		MOVE.L	#24,D2				; 24 = isTarget (second argument)
@@ -97,14 +98,17 @@ byte1code1 * MOVE (or MOVEA) of size BYTE ============================ 0001
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		ADDI.L	#$100,D7
 		JMP		isMOVE
+		
 byte1code2 * MOVE (or MOVEA) of size LONG ============================ 0010
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		ADDI.L	#$300,D7
 		JMP		isMOVE
+		
 byte1code3 * MOVE (or MOVEA) of size WORD ============================ 0011
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		ADDI.L	#$200,D7
 		JMP		isMOVE
+		
 isMOVE
 		JSR		getEA
 		MOVE.L	#16,D2				; 16 = isSource (first argument)
@@ -126,6 +130,7 @@ isMOVE
 		
 		ADDI.L	#$01,D7
 		JMP		alldone				; done --------------------------> MOVE
+		
 isMOVEA
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		
@@ -161,6 +166,7 @@ byte1code4 * ========================================================= 0100
 		JSR		setEA
 		
 		JMP		alldone				; done ---------------------------> LEA
+		
 isRTS
 		ADDI.B	#$1D,D7				; all zeros except 29 
 		JMP		alldone				; done ---------------------------> RTS
@@ -182,6 +188,7 @@ byte1code5 * ========================================================= 0101
 		
 		ADDI.L	#$B,D7
 		JMP		alldone				; done --------------------------> SUBQ
+		
 isADDQ
 		ADDI.L	#$7,D7
 		JMP		alldone				; done --------------------------> ADDQ
@@ -240,6 +247,7 @@ byte1code9 * ========================================================= 1001
 		JSR		setEA
 		
 		JMP		alldone				; done ---------------------------> SUB
+		
 isSUBA
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		
@@ -248,6 +256,7 @@ isSUBA
 		
 		MOVE.L	#2,D1				; indicates a An
 		JMP		EAofSUBisSource		; EA is source
+		
 EAofSUBisSource
 		MOVE.L	#24,D2				; 24 = isTarget
 		MOVE.L	#4,D3				; register number is middle 3 bits
@@ -279,24 +288,34 @@ byte1code11 * ======================================================== 1011
 		
 		JSR		setSize
 		
+		ADDI.L	#$15,D7
+		
 		MOVE.L	#1,D1				; indicates a Dn
 		JMP		EAisSource
-		
-		ADDI.L	#$15,D7
 		
 isEOR
 		JSR		setSize
 		
-		ADDI.L	#$E,D7
+		MOVE.L	#1,D1				; indicates a Dn
+		MOVE.L	#16,D2				; 16 = isSource
+		MOVE.L	#4,D3				; register number is middle 3 bits
+		JSR		setEA
+		
+		JSR		getEA
+		MOVE.L	#24,D2				; 24 = isTarget
+		MOVE.L	#13,D3				; register number is last 3 bits
+		JSR		setEA
+		
+		ADDI.L	#$E,D7				; done ---------------------------> EOR
 		
 isCMPA
-		MOVE.L	#2,D1				; indicates a An
-		JMP		EAisSource
-		
 		MOVE.L	#8,D2
 		JSR		setBitSize
 		
 		ADDI.L	#$16,D7
+		
+		MOVE.L	#2,D1				; indicates a An
+		JMP		EAisSource
 		
 EAisSource
 		MOVE.L	#24,D2				; 24 = isTarget
@@ -308,7 +327,7 @@ EAisSource
 		MOVE.L	#13,D3				; register number is last 3 bits
 		JSR		setEA
 		
-		JMP		alldone
+		JMP		alldone				; done --------------------> CMP / CMPA
 
 byte1code12 * ======================================================== 1100
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
