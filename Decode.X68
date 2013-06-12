@@ -196,26 +196,47 @@ isADDQ
 byte1code6 * ========================================================= 0110
 		MOVE.L	D0,D1				; reset D1 to D0 (full command)
 		
-		; TODO Bcc <-------------------------------------------------------
-		
-		CMPI.B	#$00,D1				; check the displacement
-		;...
-		
 		MOVE.L	#4,D2				* keep only the condition
 		LSL.L	D2,D1
 		MOVE.L	#12,D2
 		LSR.L	D2,D1
 		
-		CMPI.B	#2,D2
-		BEQ		isHI
+		MOVE.B	#28,D7				; set to HI
+		CMPI.B	#2,D2				; if condition warrents
+		BEQ		BccInstructionSet
+		
+		MOVE.B	#27,D7				; set to NE	
 		CMPI.B	#3,D2
-		BEQ		isLS
+		BEQ		BccInstructionSet
+		
+		MOVE.B	#26,D7				; set to LT	
 		CMPI.B	#6,D2
-		BEQ		isNE
+		BEQ		BccInstructionSet
+		
+		MOVE.B	#25,D7				; set to LS
 		CMPI.B	#7,D2
-		BEQ		isEQ
+		BEQ		BccInstructionSet
+		
+		MOVE.B	#24,D7				; set to EQ
 		CMPI.B	#13,D2
-		BEQ		isLT
+		BEQ		BccInstructionSet
+		
+BccInstructionSet		
+		ADDI.L	#$80000,D7
+		
+		MOVE.L	D0,D1				; reset D1 to D0 (full command)
+		CMPI.B	#$00,D1				; check the displacement
+		BEQ		is16BitBcc			; if 0 it's 16 bit after the command
+		
+		ADDI.L	#$100				; else it's a byte of in command data
+		MOVE.B	D1,D6
+		
+		JMP		alldone				; done ---------------------------> Bcc
+		
+is16BitBcc
+		ADDI.L	#$200				; size is word (16 bits)
+
+		* what that data is should be handled by the EA guy
 		
 		JMP		alldone
 
@@ -576,7 +597,7 @@ figureEA
 		CMPI.B	#$38,D1
 		BEQ		isAbsWord
 		CMPI.B	#$39,D1
-		BEQ		isAbsLong			; else (42) is Immediate Data
+		BEQ		isAbsLong			; else (3C) is Immediate Data
 		
 		MOVE.L	#8,D1
 		RTS
