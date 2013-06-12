@@ -30,7 +30,7 @@
 ;    RTS
 ;-----------------------------------------------------------
 
-START:	ORG			$1000		; first instruction
+START:	ORG			$7000		; first instruction
 
 		MOVEA.W		#$7004,A0	; staging address
 
