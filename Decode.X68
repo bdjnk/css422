@@ -184,7 +184,7 @@ byte1code5 * ========================================================= 0101
 		ADDI.L	#$80000,D7			; source is immediate data
 		
 		MOVE.L	#4,D2				* isolate data from command
-		LSL.L	D2,D1
+		LSL.W	D2,D1
 		MOVE.L	#13,D2
 		LSR.L	D2,D1
 		
